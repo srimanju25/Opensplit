@@ -1,6 +1,6 @@
 # OpenSplit – Open Source Expense Sharing Platform
 
-A free, privacy-friendly expense sharing app for students, roommates, friends, and trip groups. Split bills, track balances, and settle up — no ads, no paywalls.
+A free, privacy-friendly expense sharing app for students, roommates, friends, and trip groups. Split bills, track balances, and settle up  no ads, no paywalls.
 
 ## Tech Stack
 
