@@ -12,6 +12,7 @@ app.use(express.json())
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/groups', require('./routes/groups'))
 app.use('/api/expenses', require('./routes/expenses'))
+app.use('/api/chat', require('./routes/chat'))
 
 app.use((err, req, res, next) => {
   console.error(err.stack)

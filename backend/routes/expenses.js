@@ -69,7 +69,7 @@ router.get('/:groupId/balances', protect, async (req, res) => {
   res.json(enriched)
 })
 
-// PATCH /api/expenses/:id/settle  — mark expense as settled
+// PATCH /api/expenses/:id/settle  — mark entire expense as settled
 router.patch('/:id/settle', protect, async (req, res) => {
   const expense = await Expense.findById(req.params.id)
   if (!expense) return res.status(404).json({ message: 'Expense not found' })
@@ -77,6 +77,34 @@ router.patch('/:id/settle', protect, async (req, res) => {
   expense.settled = true
   await expense.save()
   res.json({ message: 'Expense marked as settled', expense })
+})
+
+// PATCH /api/expenses/:id/settle-member  — mark one member's share as settled
+router.patch('/:id/settle-member', protect, async (req, res) => {
+  const { userId } = req.body
+  if (!userId) return res.status(400).json({ message: 'userId is required' })
+
+  const expense = await Expense.findById(req.params.id)
+    .populate('paidBy', 'name email')
+    .populate('splitAmong', 'name email')
+    .populate('settledBy', 'name email')
+  if (!expense) return res.status(404).json({ message: 'Expense not found' })
+
+  const alreadySettled = expense.settledBy.some((u) => u._id.toString() === userId)
+  if (!alreadySettled) {
+    expense.settledBy.push(userId)
+  }
+
+  // Auto-mark whole expense settled when all non-payer members have settled
+  const paidById = expense.paidBy._id.toString()
+  const nonPayerMembers = expense.splitAmong.filter((m) => m._id.toString() !== paidById)
+  const settledIds = expense.settledBy.map((u) => u._id ? u._id.toString() : u.toString())
+  const allSettled = nonPayerMembers.every((m) => settledIds.includes(m._id.toString()))
+  if (allSettled) expense.settled = true
+
+  await expense.save()
+  await expense.populate('settledBy', 'name email')
+  res.json(expense)
 })
 
 module.exports = router

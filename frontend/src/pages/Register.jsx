@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import {
+  Box, Paper, Typography, TextField, Button,
+  CircularProgress, Collapse, Alert
+} from '@mui/material'
 
 export default function Register() {
   const { register } = useAuth()
@@ -28,41 +32,73 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h1 className="brand">OpenSplit</h1>
-        <h2>Create Account</h2>
-        {error && <p className="error-msg">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <label>Name</label>
-          <input
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        px: 2,
+      }}
+    >
+      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 420 }}>
+        <Typography variant="h5" fontWeight={800} color="primary" gutterBottom>
+          OpenSplit
+        </Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Create Account
+        </Typography>
+
+        <Collapse in={!!error}>
+          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        </Collapse>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Name"
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
+            autoComplete="name"
           />
-          <label>Email</label>
-          <input
+          <TextField
+            label="Email"
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
+            autoComplete="email"
           />
-          <label>Password</label>
-          <input
+          <TextField
+            label="Password"
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
+            autoComplete="new-password"
+            helperText="Minimum 6 characters"
           />
-          <button type="submit" disabled={loading}>
+          <Button
+            type="submit"
+            size="large"
+            fullWidth
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            sx={{ mt: 1 }}
+          >
             {loading ? 'Creating account…' : 'Register'}
-          </button>
-        </form>
-        <p className="auth-link">
-          Already have an account? <Link to="/login">Sign in</Link>
-        </p>
-      </div>
-    </div>
+          </Button>
+        </Box>
+
+        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: 'inherit', fontWeight: 600 }}>
+            Sign in
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   )
 }

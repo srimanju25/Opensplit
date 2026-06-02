@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import { useAuth } from '../context/AuthContext'
+import {
+  Container, Typography, Box, Paper, TextField, Button,
+  FormGroup, FormControlLabel, Checkbox, Alert, Collapse,
+  Chip, Stack, IconButton, CircularProgress, InputAdornment
+} from '@mui/material'
+import { ArrowBack } from '@mui/icons-material'
 
 export default function AddExpense() {
   const { id } = useParams()
@@ -51,66 +57,103 @@ export default function AddExpense() {
     }
   }
 
-  if (!group) return <div className="page"><p className="muted">Loading…</p></div>
+  if (!group) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    )
+  }
 
   const perPerson =
     form.splitAmong.length > 0 && form.amount
       ? (parseFloat(form.amount) / form.splitAmong.length).toFixed(2)
-      : '0.00'
+      : null
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <h2>Add Expense — {group.groupName}</h2>
-      </div>
-      <div className="card" style={{ maxWidth: '520px' }}>
-        {error && <p className="error-msg">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <label>Description</label>
-          <input
+    <Container maxWidth="sm" sx={{ py: 3 }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
+        <IconButton onClick={() => navigate(`/groups/${id}`)}>
+          <ArrowBack />
+        </IconButton>
+        <Box>
+          <Typography variant="h5">Add Expense</Typography>
+          <Typography variant="body2" color="text.secondary">{group.groupName}</Typography>
+        </Box>
+      </Stack>
+
+      <Paper variant="outlined" sx={{ p: 3 }}>
+        <Collapse in={!!error}>
+          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        </Collapse>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <TextField
+            label="Description"
             placeholder="e.g. Dinner at restaurant"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             required
           />
-          <label>Amount (₹)</label>
-          <input
+
+          <TextField
+            label="Amount"
             type="number"
-            min="0.01"
-            step="0.01"
+            inputProps={{ min: '0.01', step: '0.01' }}
             placeholder="0.00"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             required
+            InputProps={{
+              startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+            }}
           />
-          <label>Paid by</label>
-          <p className="muted">{group.members.find((m) => m._id === user?._id)?.name || user?.name} (you)</p>
 
-          <label>Split among</label>
-          <div className="member-checkboxes">
-            {group.members.map((m) => (
-              <label key={m._id} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={form.splitAmong.includes(m._id)}
-                  onChange={() => toggleMember(m._id)}
+          <Box>
+            <Typography variant="subtitle1" gutterBottom>Paid by</Typography>
+            <Chip
+              label={`${group.members.find((m) => m._id === user?._id)?.name || user?.name} (you)`}
+              color="primary"
+              variant="outlined"
+            />
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle1" gutterBottom>Split among</Typography>
+            <FormGroup>
+              {group.members.map((m) => (
+                <FormControlLabel
+                  key={m._id}
+                  control={
+                    <Checkbox
+                      checked={form.splitAmong.includes(m._id)}
+                      onChange={() => toggleMember(m._id)}
+                      color="primary"
+                    />
+                  }
+                  label={m.name}
                 />
-                {m.name}
-              </label>
-            ))}
-          </div>
+              ))}
+            </FormGroup>
+          </Box>
 
-          {form.amount && form.splitAmong.length > 0 && (
-            <p className="split-preview">
+          {perPerson && (
+            <Alert severity="info" icon={false}>
               Each person pays <strong>₹{perPerson}</strong>
-            </p>
+            </Alert>
           )}
 
-          <button type="submit" disabled={loading} style={{ marginTop: '1.5rem', width: '100%' }}>
+          <Button
+            type="submit"
+            size="large"
+            fullWidth
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+          >
             {loading ? 'Adding…' : 'Add Expense'}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   )
 }
