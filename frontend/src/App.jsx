@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ThemeProvider, CssBaseline } from '@mui/material'
+import { buildTheme } from './theme'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
@@ -9,7 +11,6 @@ import GroupDetails from './pages/GroupDetails'
 import AddExpense from './pages/AddExpense'
 import ExpenseHistory from './pages/ExpenseHistory'
 import Settlement from './pages/Settlement'
-import './index.css'
 
 function PrivateRoute({ children }) {
   const { user } = useAuth()
@@ -36,15 +37,26 @@ function AppRoutes({ darkMode, toggleDark }) {
 }
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem('theme') === 'dark'
+  )
+  const theme = useMemo(() => buildTheme(darkMode ? 'dark' : 'light'), [darkMode])
+
+  function toggleDark() {
+    setDarkMode((d) => {
+      localStorage.setItem('theme', !d ? 'dark' : 'light')
+      return !d
+    })
+  }
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes darkMode={darkMode} toggleDark={() => setDarkMode((d) => !d)} />
+          <AppRoutes darkMode={darkMode} toggleDark={toggleDark} />
         </AuthProvider>
       </BrowserRouter>
-    </div>
+    </ThemeProvider>
   )
 }

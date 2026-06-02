@@ -8,6 +8,7 @@ const expenseSchema = new mongoose.Schema(
     splitAmong: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true },
     settled: { type: Boolean, default: false },
+    settledBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     date: { type: Date, default: Date.now },
   },
   { timestamps: true }

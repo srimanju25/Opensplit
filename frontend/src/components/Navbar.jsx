@@ -1,3 +1,5 @@
+import { AppBar, Toolbar, Typography, Box, IconButton, Button, Tooltip } from '@mui/material'
+import { DarkMode, LightMode, Logout } from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -11,19 +13,41 @@ export default function Navbar({ darkMode, toggleDark }) {
   }
 
   return (
-    <nav className="navbar">
-      <Link to="/dashboard" className="nav-brand">OpenSplit</Link>
-      <div className="nav-actions">
-        <button className="icon-btn" onClick={toggleDark} title="Toggle dark mode">
-          {darkMode ? '☀️' : '🌙'}
-        </button>
+    <AppBar position="sticky" color="inherit">
+      <Toolbar>
+        <Typography
+          variant="h6"
+          component={Link}
+          to="/dashboard"
+          sx={{ fontWeight: 800, color: 'primary.main', textDecoration: 'none' }}
+        >
+          OpenSplit
+        </Typography>
+
+        <Box sx={{ flexGrow: 1 }} />
+
+        <Tooltip title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+          <IconButton onClick={toggleDark} sx={{ mr: 1 }}>
+            {darkMode ? <LightMode /> : <DarkMode />}
+          </IconButton>
+        </Tooltip>
+
         {user && (
           <>
-            <span className="nav-user">{user.name}</span>
-            <button className="btn-secondary small" onClick={handleLogout}>Logout</button>
+            <Typography variant="body2" sx={{ mr: 2, color: 'text.secondary' }}>
+              {user.name}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Logout />}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
           </>
         )}
-      </div>
-    </nav>
+      </Toolbar>
+    </AppBar>
   )
 }
